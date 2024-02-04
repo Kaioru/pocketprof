@@ -1,0 +1,6 @@
+!/**/.gitkeep
+
+.env
+*.pdf
+*.pptx
+chroma_store/
