@@ -8,6 +8,7 @@ from langchain_community.llms import HuggingFaceHub
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import UnstructuredPowerPointLoader
+from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_community.embeddings.sentence_transformer import (
     SentenceTransformerEmbeddings,
 )
@@ -25,18 +26,24 @@ embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"
 if not os.path.isdir(persist_directory):
     print("Generating indexes..")
     docs = []
-    for file in os.listdir('./datasets/pdf'):
-        if file.endswith('.pdf'):
-            print(f"Loading {file}")
-            pdf_path = os.path.join('./datasets/pdf', file)
-            loader = PyPDFLoader(pdf_path)
-            docs.extend(loader.load())
-    for file in os.listdir('./datasets/ppt'):
-        if file.endswith('.pptx'):
-            print(f"Loading {file}")
-            ppt_path = os.path.join('./datasets/ppt', file)
-            loader = UnstructuredPowerPointLoader(ppt_path)
-            docs.extend(loader.load())
+    for file in os.listdir('./datasets'):
+        path = os.path.join('./datasets', file)
+        loaders = {
+            '.pdf': PyPDFLoader,
+            '.pptx': UnstructuredPowerPointLoader,
+        }
+        file_name, file_extension = os.path.splitext(path)
+
+        loader = loaders.get(file_extension)
+
+        if loader is not None:
+            print(file_name)
+            docs.extend(loader(path).load())
+
+    sources_file = open('./datasets/sources/html.txt', 'r')
+    sources = sources_file.readlines()
+    loader = PlaywrightURLLoader(urls=sources)
+    docs.extend(loader.load())
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = text_splitter.split_documents(docs)
@@ -51,7 +58,7 @@ prompt = PromptTemplate(template=
 """
 [INST]
 You are an professor for question-answering tasks. Use the following pieces of retrieved context to answer the question, do not mention anything about contexts. If you don't know the answer, just say that you don't know, do not mention about contexts. Use three sentences maximum and keep the answer concise
-Do not sound overly scientific, assume the role as a professor named 'Pocket Prof.'.
+Do not sound overly scientific, assume the role as a professor named Pocket Professor.
 
 Context: {context}
 
@@ -90,6 +97,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     response = await chain.ainvoke(update.message.text)
+    print(response)
     await update.message.reply_text(response.split("[/INST]")[1])
 
 application = Application.builder().token(os.environ["TELEGRAM_BOT_TOKEN"]).build()

@@ -3,4 +3,5 @@
 .env
 *.pdf
 *.pptx
+datasets/*.md
 chroma_store/
