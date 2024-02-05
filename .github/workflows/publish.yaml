@@ -62,7 +62,6 @@ jobs:
         run: pnpm run build
 
       - name: Setup Pages
-        working-directory: ./web
         uses: actions/configure-pages@v3
 
       - name: Upload artifact
@@ -72,6 +71,5 @@ jobs:
           path: './dist'
 
       - name: Deploy to GitHub Pages
-        working-directory: ./web
         id: deployment
         uses: actions/deploy-pages@v2
