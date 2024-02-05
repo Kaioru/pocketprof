@@ -95,11 +95,13 @@ Here are some examples of things you can ask me:
 
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     response = chain.invoke(message.text)
     bot.reply_to(message, response)
 
 @bot.message_handler(content_types=['voice'])
 def voice_processing(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     file_info = bot.get_file(message.voice.file_id)
     file_path = f'./voices/{message.voice.file_id}.ogg'
     file_path_mp3 = f'./voices/{message.voice.file_id}.mp3'
@@ -118,6 +120,7 @@ def voice_processing(message):
         print(transcript)
         response = chain.invoke(transcript)
         bot.reply_to(message, response)
+        bot.send_chat_action(message.chat.id, 'record_audio')
 
         tts_path = f'./voices/{message.voice.file_id}-response.mp3'
         tts = openAIClient.audio.speech.create(
