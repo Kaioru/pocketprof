@@ -1,10 +1,8 @@
 import os
 import dotenv
-from langchain_community.llms import Ollama
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema.output_parser import StrOutputParser
 from langchain.prompts import PromptTemplate
-from langchain_community.llms import HuggingFaceHub
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAI
 from openai import OpenAI as OpenAIClient
@@ -68,13 +66,6 @@ Question: {question}
 )
 
 llm = OpenAI()
-#llm = Ollama(model="llama2")
-#llm = HuggingFaceHub(
-#    repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1", 
-#    model_kwargs={
-#        "temperature": 0.5, "max_length": 64, "max_new_tokens": 512
-#    }
-#)
 
 def format_docs(docs):
     return "\n\n" + "\n\n".join(
@@ -132,5 +123,4 @@ def voice_processing(message):
         with open(tts_path, 'rb') as audio:
             bot.send_audio(message.chat.id, audio)
     
-
 bot.infinity_polling()
