@@ -83,7 +83,15 @@ bot = telebot.TeleBot(os.environ["TELEGRAM_BOT_TOKEN"], parse_mode=None)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-	bot.reply_to(message, "Hey, how can I help you?")
+	bot.reply_to(message, """
+Hey, I'm Pocket Prof.! How can I help you?
+              
+You can ask me various questions regarding NTU, SCSE, and it's modules.
+Here are some examples of things you can ask me:
+    * Ask me about CE2005 labs
+    * Ask me about the AU requirements for CS
+    * Ask me about what you'll learn in CS
+""")
 
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):

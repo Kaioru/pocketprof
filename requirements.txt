@@ -1,5 +1,9 @@
 langchain==0.1.5
 langchain_community==0.0.17
 langchain_core==0.1.18
+langchain_openai==0.0.5
+openai==1.11.1
+pydub==0.25.1
+pyTelegramBotAPI==4.15.4
+pyTelegramBotAPI==4.15.4
 python-dotenv==1.0.1
-python-telegram-bot==20.7
