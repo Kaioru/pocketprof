@@ -5,3 +5,5 @@
 *.pptx
 datasets/*.md
 chroma_store/
+*.mp3
+*.ogg

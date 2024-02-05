@@ -6,6 +6,9 @@ from langchain.schema.output_parser import StrOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import HuggingFaceHub
 from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAI
+from openai import OpenAI as OpenAIClient
+from pydub import AudioSegment
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import UnstructuredPowerPointLoader
 from langchain_community.document_loaders import PlaywrightURLLoader
@@ -14,9 +17,7 @@ from langchain_community.embeddings.sentence_transformer import (
 )
 from langchain_core.runnables import RunnablePassthrough
 from langchain import hub
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
-
+import telebot
 
 dotenv.load_dotenv()
 
@@ -56,25 +57,24 @@ retriever = vectorstore.as_retriever()
 
 prompt = PromptTemplate(template=
 """
-[INST]
 You are an professor for question-answering tasks. Use the following pieces of retrieved context to answer the question, do not mention anything about contexts. If you don't know the answer, just say that you don't know, do not mention about contexts. Use three sentences maximum and keep the answer concise
 Do not sound overly scientific, assume the role as a professor named Pocket Professor.
 
 Context: {context}
 
 Question: {question}
-[/INST]
 """,
     input_variables=["context", "question"]
 )
 
+llm = OpenAI()
 #llm = Ollama(model="llama2")
-llm = HuggingFaceHub(
-    repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1", 
-    model_kwargs={
-        "temperature": 0.5, "max_length": 64, "max_new_tokens": 512
-    }
-)
+#llm = HuggingFaceHub(
+#    repo_id="mistralai/Mixtral-8x7B-Instruct-v0.1", 
+#    model_kwargs={
+#        "temperature": 0.5, "max_length": 64, "max_new_tokens": 512
+#    }
+#)
 
 def format_docs(docs):
     return "\n\n" + "\n\n".join(
@@ -88,21 +88,49 @@ chain=(
     | StrOutputParser()
 )
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user = update.effective_user
-    await update.message.reply_html(
-        rf"Hi {user.mention_html()}!",
-        reply_markup=ForceReply(selective=True),
-    )
+openAIClient = OpenAIClient()
+bot = telebot.TeleBot(os.environ["TELEGRAM_BOT_TOKEN"], parse_mode=None)
 
-async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    response = await chain.ainvoke(update.message.text)
-    print(response)
-    await update.message.reply_text(response.split("[/INST]")[1])
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+	bot.reply_to(message, "Hey, how can I help you?")
 
-application = Application.builder().token(os.environ["TELEGRAM_BOT_TOKEN"]).build()
+@bot.message_handler(func=lambda m: True)
+def echo_all(message):
+    response = chain.invoke(message.text)
+    bot.reply_to(message, response)
 
-application.add_handler(CommandHandler("start", start))
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_message))
+@bot.message_handler(content_types=['voice'])
+def voice_processing(message):
+    file_info = bot.get_file(message.voice.file_id)
+    file_path = f'./voices/{message.voice.file_id}.ogg'
+    file_path_mp3 = f'./voices/{message.voice.file_id}.mp3'
+    downloaded_file = bot.download_file(file_info.file_path)
+    with open(file_path, 'wb') as new_file:
+        new_file.write(downloaded_file)
+    AudioSegment.from_file(file_path).export(file_path_mp3, format="mp3")
 
-application.run_polling(allowed_updates=Update.ALL_TYPES)
+    with open(file_path_mp3, 'rb') as mp3_file:
+        transcript = openAIClient.audio.transcriptions.create(
+            model="whisper-1", 
+            file=mp3_file,
+            response_format="text",
+            language="en"
+        )
+        print(transcript)
+        response = chain.invoke(transcript)
+        bot.reply_to(message, response)
+
+        tts_path = f'./voices/{message.voice.file_id}-response.mp3'
+        tts = openAIClient.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=response,
+        )
+        tts.stream_to_file(tts_path)
+
+        with open(tts_path, 'rb') as audio:
+            bot.send_audio(message.chat.id, audio)
+    
+
+bot.infinity_polling()
