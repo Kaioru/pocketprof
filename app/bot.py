@@ -91,6 +91,8 @@ Here are some examples of things you can ask me:
     * Ask me about CE2005 labs
     * Ask me about the AU requirements for CS
     * Ask me about what you'll learn in CS
+              
+Also, feel free to send me a voice memo instead if texting is too much of a hassle!
 """)
 
 @bot.message_handler(func=lambda m: True)
