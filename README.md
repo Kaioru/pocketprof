@@ -11,3 +11,9 @@ a really cool telebot that tells u about ntu cs stuff
 1. Delete existing `chroma_store/` folder if any
 2. Add files into the `datasets/..` folders appropriately
 3. Run the app and it will regenerate the chroma_store based on the datasets
+
+## The Team
+* [Keith](https://github.com/kaioru)
+* [Susanna](https://github.com/bombaysus)
+* [Tessa](https://github.com/tessatanjr)
+* [Timothy](https://github.com/timtaifung)
