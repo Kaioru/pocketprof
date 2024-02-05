@@ -117,7 +117,7 @@ def voice_processing(message):
             response_format="text",
             language="en"
         )
-        print(transcript)
+        
         response = chain.invoke(transcript)
         bot.reply_to(message, response)
         bot.send_chat_action(message.chat.id, 'record_audio')
