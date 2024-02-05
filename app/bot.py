@@ -120,6 +120,6 @@ def voice_processing(message):
         tts.stream_to_file(tts_path)
 
         with open(tts_path, 'rb') as audio:
-            bot.send_audio(message.chat.id, audio)
+            bot.send_voice(message.chat.id, audio)
     
 bot.infinity_polling()
