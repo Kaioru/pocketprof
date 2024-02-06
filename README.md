@@ -15,5 +15,5 @@ a really cool telebot that tells u about ntu cs stuff
 ## The Team
 * [Keith](https://github.com/kaioru)
 * [Susanna](https://github.com/bombaysus)
-* [Tessa](https://github.com/tessatanjr)
+* [Tessa](https://github.com/tessatanjr) 🦆
 * [Timothy](https://github.com/timtaifung)
