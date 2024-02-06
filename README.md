@@ -13,7 +13,7 @@ a really cool telebot that tells u about ntu cs stuff
 3. Run the app and it will regenerate the chroma_store based on the datasets
 
 ## The Team
-* [Keith](https://github.com/kaioru)
+* [Keith](https://github.com/kaioru) 🐸
 * [Susanna](https://github.com/susannabombay)
 * [Tessa](https://github.com/tessatanjr) 🦆
 * [Timothy](https://github.com/timtaifung)
